@@ -127,6 +127,8 @@ echo detach vdisk >> UnmountVHD.diskpart
 
 call :run_diskpart UnmountVHD.diskpart
 
+rem TODO: create differential image with bitmap that is not byte aligned
+
 exit /b 0
 
 rem Creates test file entries
