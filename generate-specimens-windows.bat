@@ -27,21 +27,23 @@ if not "%version%" == "10.0" (
 	exit /b 1
 )
 
-if exist "%version%" (
-	echo Specimens directory: %version% already exists.
+set specimenspath=specimens\%version%
+
+if exist "%specimenspath%" (
+	echo Specimens directory: %specimenspath% already exists.
 
 	exit /b 1
 )
 
-mkdir "%version%"
+mkdir "%specimenspath%"
 
 rem Create a fixed-size VHD image with a NTFS file system
 set unitsize=4096
 set imagename=fixed.vhd
 set imagesize=256
 
-echo create vdisk file=%cd%\%version%\%imagename% maximum=%imagesize% type=fixed > CreateVHD.diskpart
-echo select vdisk file=%cd%\%version%\%imagename% >> CreateVHD.diskpart
+echo create vdisk file=%cd%\%specimenspath%\%imagename% maximum=%imagesize% type=fixed > CreateVHD.diskpart
+echo select vdisk file=%cd%\%specimenspath%\%imagename% >> CreateVHD.diskpart
 echo attach vdisk >> CreateVHD.diskpart
 echo convert mbr >> CreateVHD.diskpart
 echo create partition primary >> CreateVHD.diskpart
@@ -54,7 +56,7 @@ call :run_diskpart CreateVHD.diskpart
 
 call :create_test_file_entries x
 
-echo select vdisk file=%cd%\%version%\%imagename% > UnmountVHD.diskpart
+echo select vdisk file=%cd%\%specimenspath%\%imagename% > UnmountVHD.diskpart
 echo detach vdisk >> UnmountVHD.diskpart
 
 call :run_diskpart UnmountVHD.diskpart
@@ -64,8 +66,8 @@ set unitsize=4096
 set imagename=dynamic.vhd
 set imagesize=256
 
-echo create vdisk file=%cd%\%version%\%imagename% maximum=%imagesize% type=expandable > CreateVHD.diskpart
-echo select vdisk file=%cd%\%version%\%imagename% >> CreateVHD.diskpart
+echo create vdisk file=%cd%\%specimenspath%\%imagename% maximum=%imagesize% type=expandable > CreateVHD.diskpart
+echo select vdisk file=%cd%\%specimenspath%\%imagename% >> CreateVHD.diskpart
 echo attach vdisk >> CreateVHD.diskpart
 echo convert mbr >> CreateVHD.diskpart
 echo create partition primary >> CreateVHD.diskpart
@@ -78,7 +80,7 @@ call :run_diskpart CreateVHD.diskpart
 
 call :create_test_file_entries x
 
-echo select vdisk file=%cd%\%version%\%imagename% > UnmountVHD.diskpart
+echo select vdisk file=%cd%\%specimenspath%\%imagename% > UnmountVHD.diskpart
 echo detach vdisk >> UnmountVHD.diskpart
 
 call :run_diskpart UnmountVHD.diskpart
@@ -88,8 +90,8 @@ set unitsize=4096
 set imagename=parent.vhd
 set imagesize=256
 
-echo create vdisk file=%cd%\%version%\%imagename% maximum=%imagesize% type=fixed > CreateVHD.diskpart
-echo select vdisk file=%cd%\%version%\%imagename% >> CreateVHD.diskpart
+echo create vdisk file=%cd%\%specimenspath%\%imagename% maximum=%imagesize% type=fixed > CreateVHD.diskpart
+echo select vdisk file=%cd%\%specimenspath%\%imagename% >> CreateVHD.diskpart
 echo attach vdisk >> CreateVHD.diskpart
 echo convert mbr >> CreateVHD.diskpart
 echo create partition primary >> CreateVHD.diskpart
@@ -104,15 +106,15 @@ for /f "tokens=2,3" %%a in ('echo list volume ^| diskpart') do (
     if %%b==X set volumenumber=%%a
 )
 
-echo select vdisk file=%cd%\%version%\%imagename% > UnmountVHD.diskpart
+echo select vdisk file=%cd%\%specimenspath%\%imagename% > UnmountVHD.diskpart
 echo detach vdisk >> UnmountVHD.diskpart
 
 call :run_diskpart UnmountVHD.diskpart
 
 set imagename=child.vhd
 
-echo create vdisk file=%cd%\%version%\%imagename% parent=%cd%\%version%\parent.vhd > CreateVHD.diskpart
-echo select vdisk file=%cd%\%version%\%imagename% >> CreateVHD.diskpart
+echo create vdisk file=%cd%\%specimenspath%\%imagename% parent=%cd%\%specimenspath%\parent.vhd > CreateVHD.diskpart
+echo select vdisk file=%cd%\%specimenspath%\%imagename% >> CreateVHD.diskpart
 echo attach vdisk >> CreateVHD.diskpart
 
 echo select volume=%volumenumber% >> CreateVHD.diskpart
@@ -122,7 +124,7 @@ call :run_diskpart CreateVHD.diskpart
 
 call :create_test_file_entries x
 
-echo select vdisk file=%cd%\%version%\%imagename% > UnmountVHD.diskpart
+echo select vdisk file=%cd%\%specimenspath%\%imagename% > UnmountVHD.diskpart
 echo detach vdisk >> UnmountVHD.diskpart
 
 call :run_diskpart UnmountVHD.diskpart
@@ -182,8 +184,7 @@ if %errorlevel% neq 0 (
 del /q %diskpartscript%
 
 rem Give the system a bit of time to adjust
-timeout /t 1 > nul
+choice /t 1 /d y > nul
 
 ENDLOCAL
 exit /b 0
-
